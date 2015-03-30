@@ -67,7 +67,7 @@ clean:
 	rm -rf \$(EXEC) \$(OBJECTS)
 
 spotless: clean
-	spotless ./ \$(SRC_DIR) \$(BIN_DIR) \$(LIB_DIR) \$(INC_DIR)
+	spotless -r ./ \$(SRC_DIR) \$(BIN_DIR) \$(LIB_DIR) \$(INC_DIR)
 
 test: all
 	\$(EXEC)

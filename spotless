@@ -8,14 +8,24 @@
 cd $PWD
 
 if [ $# == 0 ]; then
-   rm *~
+   rm *~ &> /dev/null
+elif [ $1 == -r ]; then
+    rm *~ &> /dev/null
+    for dir in */
+    do
+	if [ -a $dir ]; then
+	    cd $dir
+	    spotless -r
+	    cd .. 
+	fi
+    done
 else
     for var in "$@"
     do
 	if [[ $var = */ ]]; then
-	    rm $var*~
+	    rm $var*~ &> /dev/null
 	else
-	    rm $var/*~
+	    rm $var/*~ &> /dev/null
 	fi
    done
 fi
