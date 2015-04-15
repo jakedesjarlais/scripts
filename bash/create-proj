@@ -33,10 +33,12 @@ PROJ_NAME="$1"
 PROJ_DIR=.
 Cplusplus=yes
 
-MAKEFILE="
-CC := g++
+MAKEFILE="##### PROJECT SETTINGS #####
+NVCC := nvcc
+GCC := g++
 
 CC_FLAGS := -Wall
+NVCC_FLAGS := -Wall
 
 PROGRAM := $PROJ_NAME
 
@@ -44,35 +46,57 @@ SRC_DIR := ./src
 BIN_DIR := ./bin
 INC_DIR := ./inc
 LIB_DIR := ./lib
+##### PROJECT SETTINGS #####
 
+
+
+CC_FLAGS += -I\$(INC_DIR)
+NVCC_FLAGS += -I\$(INC_DIR)
 
 EXEC := \$(BIN_DIR)/\$(PROGRAM)
-SOURCES := \$(wildcard \$(SRC_DIR)/*.cpp)
-OBJECTS := \$(patsubst ./src%%, ./bin%%, \$(SOURCES:.cpp=.o))
-INCLUDES := \$(wildcard \$(INC_DIR)/*.h)
+CPP_SRCS := \$(wildcard \$(SRC_DIR)/*.cpp)
+CPP_OBJS := \$(patsubst ./src%%, ./bin%%, \$(CPP_SRCS:.cpp=.o))
+CPP_INC := \$(wildcard \$(INC_DIR)/*.h)
+
+CU_SRCS := \$(wildcard \$(SRC_DIR)/*.cu)
+CU_OBJS := \$(patsubst ./src%%, ./bin%%, \$(CU_SRCS:.cu=.o))
+CU_INC := \$(wildcard \$(INC_DIR)/*.cuh)
+
 
 
 all: \$(EXEC)
 
-\$(EXEC): \$(OBJECTS)
-	\$(CC) \$(OBJECTS) -o \$(EXEC)
+\$(EXEC): \$(CPP_OBJS)
+	\$(GCC) \$^ -o \$@
 
-\$(BIN_DIR)/%%.o:\$(SRC_DIR)/%%.cpp \$(INCLUDES)
-	\$(CC) \$(CC_FLAGS) -c \$< -o \$@
+\$(BIN_DIR)/%%.o:\$(SRC_DIR)/%%.cpp \$(CPP_INC) \$(CU_INC)
+	\$(GCC) \$(CC_FLAGS) -c \$< -o \$@
+
+\$(BIN_DIR)\%%.o:\$(SRC_DIR)/%%.cu \$(CPP_INC) \$(CU_INC)
+	\$(NVCC) \$(NVCC_FLAGS) -c \$< -o \$@
 
 
-.PHONY: clean spotless test gdb
 
+.PHONY: cuda
+cuda: \$(CPP_OBJS) \$(CU_OBJS)
+	\$(NVCC) -c \$^ -o \$(EXEC)
+
+.PHONY: clean
 clean:
-	rm -rf \$(EXEC) \$(OBJECTS)
+	rm -rf \$(EXEC) \$(CPP_OBJS) \$(CU_OBJS)
 
+.PHONY: spotless
 spotless: clean
-	spotless -r ./ \$(SRC_DIR) \$(BIN_DIR) \$(LIB_DIR) \$(INC_DIR)
+	spotless -r
 
+.PHONY: test
 test: all
 	\$(EXEC)
 
+#TODO: get working for cuda
+.PHONY: gdb
 gdb: CC_FLAGS += -g
+gdb: NVCC_FLAGS += -g
 gdb: all
 	gdb \$(EXEC)
 "
