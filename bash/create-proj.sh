@@ -5,7 +5,6 @@
 #   makes an src, inc, lib, and bin directories
 #   writes a generic main.cpp (or .c) under the src dorectory
 
-# TODO: makefile doesnt work for c code of c/c++ code
 
 HELP_MESSAGE="The create-proj creates a c/c++ project skeleton including\n
      - generic Makefile                                                 \n
@@ -37,8 +36,8 @@ MAKEFILE="##### PROJECT SETTINGS #####
 NVCC := nvcc
 GCC := g++
 
-CC_FLAGS := -Wall
-NVCC_FLAGS := -Wall
+CC_FLAGS := -Wall -fpermissive
+NVCC_FLAGS := -g -G
 
 PROGRAM := $PROJ_NAME
 
@@ -46,6 +45,8 @@ SRC_DIR := ./src
 BIN_DIR := ./bin
 INC_DIR := ./inc
 LIB_DIR := ./lib
+
+CUDA_PATH := /usr/local/cuda
 ##### PROJECT SETTINGS #####
 
 
@@ -72,14 +73,17 @@ all: \$(EXEC)
 \$(BIN_DIR)/%%.o:\$(SRC_DIR)/%%.cpp \$(CPP_INC) \$(CU_INC)
 	\$(GCC) \$(CC_FLAGS) -c \$< -o \$@
 
-\$(BIN_DIR)\%%.o:\$(SRC_DIR)/%%.cu \$(CPP_INC) \$(CU_INC)
+\$(BIN_DIR)/%%.o:\$(SRC_DIR)/%%.cu \$(CPP_INC) \$(CU_INC)
 	\$(NVCC) \$(NVCC_FLAGS) -c \$< -o \$@
 
 
 
 .PHONY: cuda
+cuda: \$(NVCC_FLAGS) += -I\$(CUDA_PATH)/include
+cuda: \$(CC_FLAGS) += -I\$(CUDA_PATH)/include
 cuda: \$(CPP_OBJS) \$(CU_OBJS)
-	\$(NVCC) -c \$^ -o \$(EXEC)
+	export LD_LIBRARY_PATH=\$(CUDA_PATH)/lib
+	\$(NVCC) -o \$(EXEC) \$^
 
 .PHONY: clean
 clean:

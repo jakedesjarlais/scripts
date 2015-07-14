@@ -37,6 +37,37 @@ elif [ "$1" == "cuda_a" ]; then
 		echo "Invalid arguement. -h for help."
 	fi 
 
+elif [ "$1" == "bringup_e" ]; then
+	cd /sw/dev/gpu_drv/bringup_e/drivers/gpgpu
+	if [ "$#" == "1" ] || [ "$2" == "db" ] || [ "$2" == "-db" ]; then
+		echo "Building debug version of Bringup_e branch GPGPU driver..."
+		unix-build --tools /sw/tools nvmake linux amd64 debug PAR=12 -j12
+		echo "done."
+	elif [ "$2" == "rel" ] || [ "$2" == "-rel" ]; then
+		echo "Building release version of Bringup_e branch GPGPU driver..."
+		unix-build --tools /sw/tools nvmake linux amd64 release PAR=12 -j12	
+		echo "done."
+	else
+		echo "Invalid arguement. -h for help."
+	fi 
+
+
+
+    
+elif [ "$1" == "rm" ]; then
+    cd /sw/dev/gpu_drv/cuda_a/drivers/resman
+    echo "Building the Resman Driver..."
+    unix-build --tools /sw/tools nvmake resman amd64 linux -j12 PAR=12
+    echo done.
+
+
+
+elif [ "$1" == "uvm" ]; then
+    cd /sw/dev/gpu_drv/cuda_a/drivers/mm/uvm
+    echo "Building the UVM driver..."
+    unix-build --tools /sw/tools nvmake uvm amd64 linux -j12 PAR=12
+    echo done.
+
 
 
 elif [ "$1" == "cudart" ]; then

@@ -3,14 +3,12 @@
 # Removes all temporary files created by emacs and vim. This can be potentially harmful if data
 #   is unsaved. Use with caution
 
-# TODO: implement a -r for recursive spotless
-
 cd $PWD
 
 if [ $# == 0 ]; then
-   rm *~ &> /dev/null
+    rm *~ \#* .#* &> /dev/null
 elif [ $1 == -r ]; then
-    rm *~ &> /dev/null
+    rm *~ \#* .#* &> /dev/null
     for dir in */
     do
 	if [ -a $dir ]; then
@@ -23,9 +21,9 @@ else
     for var in "$@"
     do
 	if [[ $var = */ ]]; then
-	    rm $var*~ &> /dev/null
+	    rm $var*~ $var#* .#* &> /dev/null
 	else
-	    rm $var/*~ &> /dev/null
+	    rm $var/*~ $var/#* .#* &> /dev/null
 	fi
    done
 fi
