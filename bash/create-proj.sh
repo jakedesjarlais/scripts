@@ -20,7 +20,8 @@ HELP_MESSAGE="The create-proj creates a c/c++ project skeleton including\n
            default is the current directory                             \n
         -c Creates a C specific project. The default is C++             \n
            note that C++ project Makefile is compatible with            \n
-           C files                                                      \n"
+           C files                                                      \n
+        -j Creates a Java project. The defualt is C++                   \n"
 
 # Display help message
 if [ "$1" == -h ] || [ "$1" == --h ] || [ "$1" == -help ] || [ "$1" == --help ]; then
@@ -32,7 +33,8 @@ PROJ_NAME="$1"
 PROJ_DIR=.
 Cplusplus=yes
 
-MAKEFILE="##### PROJECT SETTINGS #####
+# C/C++ Project settings
+C_CPP_MAKEFILE="##### PROJECT SETTINGS #####
 NVCC := nvcc
 GCC := g++
 
@@ -125,6 +127,10 @@ int main(void) {
 }
 "
 
+# Java project settings
+# TODO: finish java makefile and class files.
+
+# TODO: fix this code so you can set flags in any order. I don't think that is possible right now.
 # Specify a directory to create the project under
 if [ "$2" == -d ]; then
     PROJ_DIR=$3
@@ -138,11 +144,14 @@ elif [ "$3" == -c ]; then
     Cplusplus=no
 fi
 
+# TODO: Add -j option for java project
+
 # Create folders for project
 mkdir $PROJ_DIR/$PROJ_NAME $PROJ_DIR/$PROJ_NAME/src $PROJ_DIR/$PROJ_NAME/bin $PROJ_DIR/$PROJ_NAME/lib $PROJ_DIR/$PROJ_NAME/inc
 
 # Create and write Makefile and main.cpp
-printf "$MAKEFILE" >> $PROJ_DIR/$PROJ_NAME/Makefile
+# TODO: add makefile support for Java projects
+printf "$C_CPP_MAKEFILE" >> $PROJ_DIR/$PROJ_NAME/Makefile
 if [ "$Cplusplus" == yes ]; then
     printf "$MAIN_CPP" >> $PROJ_DIR/$PROJ_NAME/src/main.cpp
 else
