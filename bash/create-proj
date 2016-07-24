@@ -33,6 +33,13 @@ PROJ_NAME="$1"
 PROJ_DIR=.
 Cplusplus=yes
 
+# Input Validation
+# TODO: check to make sure the name is a valid possilble file name.
+if [ $# -eq 0 ]; then
+    echo "No project name specified."
+    exit 1
+fi
+
 # C/C++ Project settings
 C_CPP_MAKEFILE="##### PROJECT SETTINGS #####
 NVCC := nvcc
