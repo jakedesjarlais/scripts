@@ -1,0 +1,71 @@
+##### PROJECT SETTINGS #####
+NVCC := nvcc
+GCC := gcc
+
+CC_FLAGS := -Wall -fpermissive
+NVCC_FLAGS := -g -G
+
+PROGRAM := h265-streaming
+
+SRC_DIR := ./src
+BIN_DIR := ./bin
+INC_DIR := ./inc
+LIB_DIR := ./lib
+
+CUDA_PATH := /usr/local/cuda
+##### PROJECT SETTINGS #####
+
+
+
+CC_FLAGS += -I$(INC_DIR)
+NVCC_FLAGS += -I$(INC_DIR)
+
+EXEC := $(BIN_DIR)/$(PROGRAM)
+CPP_SRCS := $(wildcard $(SRC_DIR)/*.c)
+CPP_OBJS := $(patsubst ./src%, ./bin%, $(CPP_SRCS:.c=.o))
+CPP_INC := $(wildcard $(INC_DIR)/*.h)
+
+CU_SRCS := $(wildcard $(SRC_DIR)/*.cu)
+CU_OBJS := $(patsubst ./src%, ./bin%, $(CU_SRCS:.cu=.o))
+CU_INC := $(wildcard $(INC_DIR)/*.cuh)
+
+
+
+all: $(EXEC)
+
+$(EXEC): $(CPP_OBJS)
+	$(GCC) $^ -o $@
+
+$(BIN_DIR)/%.o:$(SRC_DIR)/%.cpp $(CPP_INC) $(CU_INC)
+	$(GCC) $(CC_FLAGS) -c $< -o $@
+
+$(BIN_DIR)/%.o:$(SRC_DIR)/%.cu $(CPP_INC) $(CU_INC)
+	$(NVCC) $(NVCC_FLAGS) -c $< -o $@
+
+
+
+.PHONY: cuda
+cuda: $(NVCC_FLAGS) += -I$(CUDA_PATH)/include
+cuda: $(CC_FLAGS) += -I$(CUDA_PATH)/include
+cuda: $(CPP_OBJS) $(CU_OBJS)
+	export LD_LIBRARY_PATH=$(CUDA_PATH)/lib
+	$(NVCC) -o $(EXEC) $^
+
+.PHONY: clean
+clean:
+	rm -rf $(EXEC) $(CPP_OBJS) $(CU_OBJS)
+
+.PHONY: spotless
+spotless: clean
+	spotless -r
+
+.PHONY: test
+test: all
+	@$(EXEC)
+
+#TODO: get working for cuda
+.PHONY: gdb
+gdb: CC_FLAGS += -g
+gdb: NVCC_FLAGS += -g
+gdb: all
+	gdb $(EXEC)
