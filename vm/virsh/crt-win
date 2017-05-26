@@ -1,0 +1,15 @@
+virt-install \
+--name=windows \
+--disk /data/vm-disks/windows.img,device=disk,format=raw,bus=virtio,size=250,cache=directsync,io=native \
+--disk /data/os-images/windows10-x86_64.iso,device=cdrom \
+--disk /data/cd-roms/virtio-drivers-win_amd64.vfd,device=floppy \
+--virt-type kvm \
+--ram 4096 \
+--vcpus 8,sockets=1,cores=4,threads=2 \
+--cpu host \
+--video qxl \
+--os-type windows \
+--os-variant win10 \
+--network bridge=br0 \
+--graphics vnc,listen=0.0.0.0,port=5900 \
+--noautoconsole \

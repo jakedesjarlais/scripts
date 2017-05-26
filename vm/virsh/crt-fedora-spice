@@ -1,0 +1,15 @@
+virt-install \
+--name=fedora-spice \
+--disk /data/vm-disks/fedora-spice.qcow2,device=disk,format=qcow2,bus=virtio,size=30,cache=directsync,io=native \
+--disk /data/os-images/Fedora-Workstation-Live-x86_64-25-1.3.iso,device=cdrom,bus=ide \
+--virt-type kvm \
+--ram 1024 \
+--vcpus 2,sockets=1,cores=2,threads=1 \
+--video qxl \
+--channel spicevmc \
+--os-type linux \
+--os-variant fedora22 \
+--network bridge=br0 \
+--graphics spice,listen=0.0.0.0,port=5902,tlsport= \
+--noautoconsole \
+--check path_in_use=off \

@@ -1,0 +1,153 @@
+#!/bin/bash
+#
+# This monstrosity of a script is used to run and create a windows vm
+
+# QEMU Binary
+QEMU=qemu-system-x86_64
+
+#####################################################################################################
+####################################     QEMU COMMAND     ###########################################
+#####################################################################################################
+COMMAND=( $QEMU
+
+
+########## HOST SETUP ###############################################################################
+
+    # Name the VM and give each thread a unique name from the hosts perspective
+    -name guest=windows,\
+debug-threads=on
+
+    ##### Not sure what this is for #####
+    # TODO: ?
+#    -object secret,
+#id=masterKey0,
+#format=raw,
+#file=/var/lib/libvirt/qemu/domain-1-windows/master-key.aes
+
+
+
+########## MACHINE SETUP ############################################################################
+
+    # Enable kvm as the emulation accelerator
+    -enable-kvm
+
+    # Machine emulation settings
+    -machine pc-i440fx-2.8,\
+accel=kvm,\
+usb=off,\
+dump-guest-core=off
+
+    # Choose virtual CPU features
+    -cpu host,\
+kvm=off
+
+    # Configure amout of system RAM
+    -m 2G
+
+    # VNC Setup
+    -vnc 0.0.0.0:5900
+
+    # Disable virtual VGA adaptor
+    -vga none
+
+    # Disable virtual display and framebuffer
+    -display none
+
+    # Pins VM sysmem so pages are never swapped out
+    -realtime mlock=on
+
+    # Virtual CPU configuration
+    -smp 8,\
+sockets=1,\
+cores=4,\
+threads=2
+
+    # Set machine UUID
+    -uuid e1e39888-5f76-4ee0-860b-2503ac2adde0
+
+    # Disable HPET timing mechanicsm
+    -no-hpet
+    # TODO: what does this do?
+    -boot strict=on,\
+order=dc
+
+    # Set date and time for VM
+    -rtc base=localtime,\
+driftfix=slew
+
+
+
+########## DRIVES SETUP #############################################################################
+
+    # Configure root fs drive
+    -drive file=/data/vm-disks/windows.img,\
+id=root-fs-disk,\
+format=raw,\
+if=none,\
+cache=directsync,\
+aio=native
+
+    # Configure disk with VIRTIO drivers on it
+    -drive file=/data/cd-roms/virtio-drivers-win_amd64.vfd,\
+format=raw,\
+if=none,\
+
+    # Configure installation media disk
+    -drive file=/data/os-images/windows10-x86_64.iso,\
+id=install-media-cd,\
+format=raw,\
+if=none,\
+readonly=on
+
+
+
+########## GUEST DEVICE SETUP #######################################################################
+
+     # Create PCI BLK device for the boot drive
+     -device ide-hd,\
+bus=ide.1,\
+drive=root-fs-disk
+
+     -device ide-cd,\
+bus=ide.1,\
+drive=install-media-cd
+
+     # GPU PCI device passthrough
+     -device vfio-pci,\
+host=03:00.0,\
+x-vga=on
+
+     # GPU display controller PCI passthrough
+     -device vfio-pci,\
+host=4:00.0
+
+
+
+########## DEFINE GLOBAL DRIVERS ####################################################################
+
+    #### TODO: what are these?
+    -global PIIX4_PM.disable_s4=1
+    -global kvm-pit.lost_tick_policy=delay
+    #-global isa-fdc.driveA=drive-fdc0-0-0
+    -global PIIX4_PM.disable_s3=1
+
+
+
+########## MISC SETTINGS ############################################################################
+
+    -nodefaults
+    -msg timestamp=on
+    ##### Do I need this? #####
+    # TODO: ?
+    -no-user-config
+    ##### Freeze CPU at start up #####
+    # TODO: why? - this seems to cause something to happen. Display never turns on
+    # but there is not failure detected by the host
+    #-S
+)
+
+
+########## RUN COMMAND #############################################################################
+#echo $COMMAND
+"${COMMAND[@]}"
+####################################################################################################

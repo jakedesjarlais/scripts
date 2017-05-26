@@ -1,0 +1,11 @@
+virt-install \
+--name=mac-osx \
+--disk /data/vm-disks/mac-osx.img,device=disk,format=raw,bus=sata,size=50,cache=directsync,io=native \
+--disk /data/os-images/osx-10.12-install-cd.iso,device=cdrom \
+--virt-type kvm \
+--ram 2048 \
+--vcpus 4,sockets=1,cores=4,threads=1 \
+--video vga \
+--network bridge=br0 \
+--graphics vnc,listen=0.0.0.0,port=5901 \
+--noautoconsole \

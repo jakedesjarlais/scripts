@@ -1,0 +1,13 @@
+virt-install \
+--name=ubuntu \
+--disk /data/vm-disks/ubuntu.img,device=disk,format=raw,bus=virtio,size=50,cache=directsync,io=native \
+--disk /data/os-images/ubuntu16.04.2-desktop.iso,device=cdrom \
+--virt-type kvm \
+--ram 2048 \
+--vcpus 4,sockets=1,cores=4,threads=1 \
+--video qxl \
+--os-type linux \
+--os-variant ubuntu16.04 \
+--network bridge=br0 \
+--graphics vnc,listen=0.0.0.0,port=5901 \
+--noautoconsole \

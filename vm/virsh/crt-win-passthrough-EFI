@@ -1,0 +1,16 @@
+virt-install \
+--name=windows-test \
+--disk /data/vm-disks/windows-test.qcow2,device=disk,format=qcow2,bus=ide,size=50,cache=directsync,io=native \
+--disk /data/os-images/windows10-x86_64.iso,device=cdrom \
+--virt-type kvm \
+--boot uefi \
+--vcpus 4,sockets=1,cores=4,threads=1 \
+--cpu host \
+--ram 2048 \
+--os-type windows \
+--os-variant win10 \
+--host-device pci_0000_03_00_0 \
+--host-device pci_0000_04_00_0 \
+--network bridge=br0 \
+--graphics none \
+--noautoconsole \

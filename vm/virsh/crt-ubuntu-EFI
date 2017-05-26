@@ -1,0 +1,13 @@
+virt-install \
+--name=ubuntu-test \
+--disk /data/vm-disks/ubuntu-test.qcow2,device=disk,format=qcow2,bus=ide,size=50,cache=directsync,io=native \
+--disk /data/os-images/ubuntu16.04.2-desktop.iso,device=cdrom \
+--virt-type kvm \
+--boot uefi \
+--ram 1024 \
+--vcpus 2,sockets=1,cores=2,threads=1 \
+--os-type linux \
+--os-variant ubuntu16.04 \
+--network bridge=br0 \
+--graphics none \
+--noautoconsole \
