@@ -46,37 +46,13 @@ if [ $# -eq 0 ]; then
 fi
 
 C_MAKEFILE=resources/c-makefile
-MAIN_C="
-#include <stdio.h>
-#include <stdlib.h>
-
-int main(void) {
-  pritnf(\"HELLO WORlD!!!\");
-  return 0;
-}
-"
+MAIN_C=resources/main.c
 
 CPP_MAKEFILE=resources/cpp-makefile
-MAIN_CPP="
-#include <iostream>
-#include <stdlib.h>
-
-int main(void) {
-  std::cout << \"HELLO WORLD\" << std::endl;
-  return 0;
-}
-"
+MAIN_CPP=resources/main.cpp
 
 JAVA_MAKEFILE=resources/java-makefile
-MAIN_JAVA="
-
-public class Main {
-
-    public static void main(String[] args) {
-        System.out.println(\"HELLO WORLD!!!\");
-    }
-}
-"
+MAIN_JAVA=resources/Main.java
 
 # Java project settings
 # TODO: finish java makefile and class files.
@@ -104,8 +80,10 @@ mkdir $PROJ_DIR/$PROJ_NAME $PROJ_DIR/$PROJ_NAME/src $PROJ_DIR/$PROJ_NAME/bin $PR
 # TODO: add makefile support for Java projects
 if [ "$Cplusplus" == yes ]; then
     cp $SCRIPT_PATH/$CPP_MAKEFILE $PROJ_DIR/$PROJ_NAME/Makefile
-    printf "$MAIN_CPP" >> $PROJ_DIR/$PROJ_NAME/src/main.cpp
+    cp $SCRIPT_PATH/$MAIN_CPP $PROJ_DIR/$PROJ_NAME/src/
+    sed -i -e "s/PROJECT_NAME/${PROJ_NAME}/g" $PROJ_DIR/$PROJ_NAME/Makefile
 else
     cp $SCRIPT_PATH/$C_MAKEFILE $PROJ_DIR/$PROJ_NAME/Makefile
-    printf "$MAIN_C" >> $PROJ_DIR/$PROJ_NAME/src/main.c
+    cp $SCRIPT_PATH/$MAIN_C $PROJ_DIR/$PROJ_NAME/src/
+    sed -i -e "s/PROJECT_NAME/${PROJ_NAME}/g" $PROJ_DIR/$PROJ_NAME/Makefile
 fi 

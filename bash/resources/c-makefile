@@ -2,44 +2,53 @@
 NVCC := nvcc
 GCC := gcc
 
-CC_FLAGS := -Wall -fpermissive
-NVCC_FLAGS := -g -G
-
-PROGRAM := h265-streaming
+PROGRAM := PROJECT_NAME
 
 SRC_DIR := ./src
 BIN_DIR := ./bin
 INC_DIR := ./inc
 LIB_DIR := ./lib
 
+C_LIBRARIES :=
+CU_LIBRARIES := 
+
+CC_FLAGS := -Wall
+NVCC_FLAGS := -g -G
+
 CUDA_PATH := /usr/local/cuda
 ##### PROJECT SETTINGS #####
 
 
 
-CC_FLAGS += -I$(INC_DIR)
-NVCC_FLAGS += -I$(INC_DIR)
-
 EXEC := $(BIN_DIR)/$(PROGRAM)
-CPP_SRCS := $(wildcard $(SRC_DIR)/*.c)
-CPP_OBJS := $(patsubst ./src%, ./bin%, $(CPP_SRCS:.c=.o))
-CPP_INC := $(wildcard $(INC_DIR)/*.h)
+C_SRCS := $(wildcard $(SRC_DIR)/*.c)
+C_OBJS := $(patsubst ./src%, ./bin%, $(C_SRCS:.c=.o))
+C_INC := $(wildcard $(INC_DIR)/*.h)
 
 CU_SRCS := $(wildcard $(SRC_DIR)/*.cu)
 CU_OBJS := $(patsubst ./src%, ./bin%, $(CU_SRCS:.cu=.o))
 CU_INC := $(wildcard $(INC_DIR)/*.cuh)
 
+CC_FLAGS += -I$(INC_DIR) -L$(LIB_DIR)
+ifneq ($(C_LIBRARIES),)
+    CC_FLAGS += -l$(C_LIBRARIES)
+endif
+NVCC_FLAGS += -I$(INC_DIR) -L$(LIB_DIR) -l$(CU_LIBRARIES)
+ifneq ($(CU_LIBRARIES),)
+    NVCC_FLAGS += -l$(CU_LIBRARIES)
+endif
+
 
 
 all: $(EXEC)
 
-$(EXEC): $(CPP_OBJS)
-	$(GCC) $^ -o $@
+$(EXEC): $(C_OBJS)
+	$(GCC) $(CC_FLAGS) $^ -o $@
 
-$(BIN_DIR)/%.o:$(SRC_DIR)/%.cpp $(CPP_INC) $(CU_INC)
+$(BIN_DIR)/%.o:$(SRC_DIR)/%.c $(C_INC) $(CU_INC)
 	$(GCC) $(CC_FLAGS) -c $< -o $@
 
-$(BIN_DIR)/%.o:$(SRC_DIR)/%.cu $(CPP_INC) $(CU_INC)
+$(BIN_DIR)/%.o:$(SRC_DIR)/%.cu $(C_INC) $(CU_INC)
 	$(NVCC) $(NVCC_FLAGS) -c $< -o $@
 
 
@@ -47,13 +56,13 @@ $(BIN_DIR)/%.o:$(SRC_DIR)/%.cu $(CPP_INC) $(CU_INC)
 .PHONY: cuda
 cuda: $(NVCC_FLAGS) += -I$(CUDA_PATH)/include
 cuda: $(CC_FLAGS) += -I$(CUDA_PATH)/include
-cuda: $(CPP_OBJS) $(CU_OBJS)
+cuda: $(C_OBJS) $(CU_OBJS)
 	export LD_LIBRARY_PATH=$(CUDA_PATH)/lib
 	$(NVCC) -o $(EXEC) $^
 
 .PHONY: clean
 clean:
-	rm -rf $(EXEC) $(CPP_OBJS) $(CU_OBJS)
+	rm -rf $(EXEC) $(C_OBJS) $(CU_OBJS)
 
 .PHONY: spotless
 spotless: clean
