@@ -1,0 +1,4 @@
+#!/bin/bash
+
+efibootmgr --create --part 2 --label Gentoo --loader '\EFI\gentoo\gentoo-x86_64-stable.efi' -d /dev/sda -u "root=/dev/sda4 init=/usr/lib/systemd/systemd rw quiet splash resume=/dev/sda3 iommu=on intel_iommu=on" --write-signature
+efibootmgr --create --part 2 --label Gentoo-unstable --loader '\EFI\gentoo\gentoo-x86_64-unstable.efi' -d /dev/sda -u "root=/dev/sda4 init=/usr/lib/systemd/systemd rw quiet splash resume=/dev/sda3 iommu=on intel_iommu=on" --write-signature

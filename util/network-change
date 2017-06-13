@@ -1,0 +1,6 @@
+#!/bin/bash
+
+ifconfig br0 down
+ifconfig eno1 down
+
+systemctl restart systemd-networkd.service
