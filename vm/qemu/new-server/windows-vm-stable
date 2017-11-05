@@ -1,0 +1,174 @@
+#!/bin/bash
+#
+# This monstrosity of a script is used to run and create a windows vm
+
+# QEMU Binary
+QEMU=qemu-system-x86_64
+
+#####################################################################################################
+####################################     QEMU COMMAND     ###########################################
+#####################################################################################################
+COMMAND=( $QEMU
+
+
+########## HOST SETUP ###############################################################################
+
+    # Name the VM and give each thread a unique name from the hosts perspective
+    -name guest=windows,\
+debug-threads=on
+
+    ##### Not sure what this is for #####
+    # TODO: ?
+#    -object secret,
+#id=masterKey0,
+#format=raw,
+#file=/var/lib/libvirt/qemu/domain-1-windows/master-key.aes
+
+
+
+########## MACHINE SETUP ############################################################################
+
+    # Enable kvm as the emulation accelerator
+    -enable-kvm
+
+    # Machine emulation settings
+    -machine pc-i440fx-2.8,\
+accel=kvm,\
+usb=off,\
+dump-guest-core=off
+
+    # Choose virtual CPU features
+    -cpu host,\
+kvm=off
+
+    # Configure amout of system RAM
+    -m 8G
+
+    # VNC Setup
+    -vnc 0.0.0.0:0
+
+    # Disable virtual VGA adaptor
+    -vga none
+
+    # Disable virtual display and framebuffer
+    -display none
+
+    # Pins VM sysmem so pages are never swapped out
+    -realtime mlock=on
+
+    # Virtual CPU configuration
+    -smp 6,\
+sockets=1,\
+cores=3,\
+threads=2
+
+    ##### Dont know what this does #####
+    # TODO: ?
+    -uuid e1e39888-5f76-4ee0-860b-2503ac2adde0
+
+    # Disable HPET timing mechanicsm
+    -no-hpet
+    # TODO: what does this do?
+    -boot order=dc,menu=on
+
+    # Set date and time for VM
+    -rtc base=localtime,\
+driftfix=slew
+
+
+
+########## DRIVES SETUP #############################################################################
+
+    # Configure root fs drive
+    -drive file=/data/vm-disks/windows-passthrough.img,\
+format=raw,\
+if=none,\
+id=drive-virtio-disk0,\
+cache=none,\
+aio=native
+
+    # Configure installation media disk
+    -drive file=/data/os-images/windows10-x86_64.iso,\
+format=raw,\
+if=none,\
+id=install-image,\
+readonly=on
+
+    # Configure disk with VIRTIO drivers on it
+    -drive file=/data/cd-roms/virtio-drivers-win_amd64.vfd,\
+format=raw,\
+if=none,\
+id=drive-fdc0-0-0
+
+
+
+########## GUEST DEVICE SETUP #######################################################################
+
+     # Create PCI BLK device for the boot drive
+     -device virtio-blk-pci,\
+scsi=off,\
+bus=pci.0,\
+addr=0x5,\
+drive=drive-virtio-disk0,\
+id=virtio-disk0,\
+
+     -device ide-cd,\
+bus=ide.0,\
+drive=install-image \
+
+     # NVIDIA GPU PCI device passthrough
+     -device vfio-pci,\
+host=01:00.0,\
+x-vga=on
+
+     # NVIDIA GPU Audio controller pass through
+     -device vfio-pci,\
+host=01:00.1
+
+     # Intel Integrated GPU PCI device passthrough
+     -device vfio-pci,\
+host=00:02.0
+
+     # Keybaord Passthrough
+     -usb -usbdevice host:046d:c52b
+
+     # Ethernet Port 4 PCI device passthrough
+     -device vfio-pci,\
+host=05:00.0
+
+
+########## SETUP OVMF BIOS ##########################################################################
+
+-drive if=pflash,format=raw,readonly,file=/usr/share/edk2-ovmf/OVMF_CODE.fd
+-drive if=pflash,format=raw,file=/usr/share/edk2-ovmf/OVMF_VARS.fd
+
+
+
+########## DEFINE GLOBAL DRIVERS ####################################################################
+
+    #### TODO: what are these?
+    -global PIIX4_PM.disable_s4=1
+    -global kvm-pit.lost_tick_policy=delay
+    -global isa-fdc.driveA=drive-fdc0-0-0
+    -global PIIX4_PM.disable_s3=1
+
+
+
+########## MISC SETTINGS ############################################################################
+
+    -nodefaults
+    -msg timestamp=on
+    ##### Do I need this? #####
+    # TODO: ?
+    -no-user-config
+    ##### Freeze CPU at start up #####
+    # TODO: why? - this seems to cause something to happen. Display never turns on
+    # but there is not failure detected by the host
+    #-S
+)
+
+
+########## RUN COMMAND #############################################################################
+#echo $COMMAND
+"${COMMAND[@]}"
+####################################################################################################

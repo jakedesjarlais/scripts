@@ -4,8 +4,8 @@ virt-install \
 --disk /data/os-images/windows10-x86_64.iso,device=cdrom \
 --disk /data/cd-roms/virtio-drivers-win_amd64.vfd,device=floppy \
 --virt-type kvm \
---ram 4096 \
---vcpus 8,sockets=1,cores=4,threads=2 \
+--ram 8196 \
+--vcpus 6,sockets=1,cores=3,threads=2 \
 --cpu host \
 --video qxl \
 --os-type windows \

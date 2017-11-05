@@ -1,0 +1,7 @@
+#!/bin/bash
+# Unbinds PCI devices from any drivers using them and binds them to vfio dummy driver
+#
+#     1) 0000:00:02.0 - Intel Integrated GPU
+#     2) 0000:05:00.0 - Intel Ethernet Controller 4
+
+/scripts/util/vfio-bind 0000:00:02.0 0000:05:00.0

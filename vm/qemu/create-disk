@@ -21,6 +21,7 @@ COMMAND=($QEMUIMG
     $1
 
     # Command input for the size (in GB) of the new disk
+    # Ex '20G'
     $2
 )
 
