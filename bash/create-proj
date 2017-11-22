@@ -1,16 +1,20 @@
 #!/bin/bash
 
 # Creates a new project folder
-#   writes a Generic Makefike\$
+#   writes a Generic Makefike
 #   makes an src, inc, lib, and bin directories
-#   writes a generic main.cpp (or .c) under the src dorectory
+#   writes a generic main.cpp (.c/.java) under the src dorectory
+
+# TODO: add support for java packages
+# TODO: check to make sure the project name is valid possible name for specific language
 
 SCRIPT_PATH=$(dirname "${BASH_SOURCE[0]}")
 
-HELP_MESSAGE="Create a c/c++ project skeleton including
+HELP_MESSAGE="Create a c/c++ or Java project skeleton including
      - generic Makefile
      - src, bin, inc, and lib folders
-     - main.c/cpp file with a basic main function (cpp by default)
+     - main.c/cpp or PROJECT_NAME.java file with a basic main function
+     - Creates a C project by default
                
      create-proj [PROJECT NAME] [-OPTIONS...]
                  
@@ -18,13 +22,14 @@ HELP_MESSAGE="Create a c/c++ project skeleton including
         -h    To display this message
         -d    Followed by a directory to specify a directory to
                 create the project under. If left unspecified, the
-                default is the current directory 
-        -c    Creates a C specific project. The default is C++
-                note that C++ project Makefile is compatible with
-                C files
-        -cpp  Creates a C++ project. Note that the C++ makefile is
-                compatible with c files
-        -j    Creates a Java project. The defualt is C++
+                default is the current directory.
+        -c    Creates a C specific project. Note that the project
+                Makefile is compatible with C++ files.
+        -cpp  Creates a C++ project. The default is C. Note that the 
+                C++ makefile is compatible with C files.
+        -j    Creates a Java project with a single .java file 
+                corresponding to the [PROJECT NAME] input with the
+                command.
 "
 
 # Display help message
@@ -36,10 +41,12 @@ fi
 # Variable declarations 
 PROJ_NAME="$1"
 PROJ_DIR=.
-Cplusplus=yes
+
+C_PROJ=no
+CPP_PROJ=no
+JAVA_PROJ=no
 
 # Input Validation
-# TODO: check to make sure the name is a valid possilble file name.
 if [ $# -eq 0 ]; then
     echo "No project name specified."
     exit 1
@@ -59,31 +66,48 @@ MAIN_JAVA=resources/Main.java
 
 # TODO: fix this code so you can set flags in any order. I don't think that is possible right now.
 # Specify a directory to create the project under
-if [ "$2" == -d ]; then
-    PROJ_DIR=$3
-elif [ "$3" == -d ]; then
-    PROJ_DIR=$4
+if [ "$2" == -c ] || [ "$3" == -c ] || [ "$4" == -c ]; then
+    C_PROJ=yes
 fi
 
-if [ "$2" == -c ]; then
-    Cplusplus=no
-elif [ "$3" == -c ]; then
-    Cplusplus=no
+if [ "$2" == -cpp ] || [ "$3" == -cpp ] || [ "$4" == -cpp ]; then
+    if [ "$C_PROJ" == yes ]; then
+        echo "More than one project type specified. -h for help."
+        exit 1
+    fi
+    CPP_PROJ=yes
 fi
 
-# TODO: Add -j option for java project
+if [ "$2" == -j ] || [ "$3" == -j ] || [ "$4" == -j ]; then
+    if [ "$C_PROJ" == yes ] || [ "$CPP_PROJ" == yes ]; then
+        echo "More than one project type specified. -h for help."
+        exit 1
+    fi
+    JAVA_PROJ=yes
+fi
+
+if [ "$C_PROJ" == no ] && [ "$CPP_PROJ" == no ] && [ "$JAVA_PROJ" == no ]; then
+    C_PROJ=yes
+fi
+
+
 
 # Create folders for project
 mkdir $PROJ_DIR/$PROJ_NAME $PROJ_DIR/$PROJ_NAME/src $PROJ_DIR/$PROJ_NAME/bin $PROJ_DIR/$PROJ_NAME/lib $PROJ_DIR/$PROJ_NAME/inc
 
-# Create and write Makefile and main.cpp
-# TODO: add makefile support for Java projects
-if [ "$Cplusplus" == yes ]; then
-    cp $SCRIPT_PATH/$CPP_MAKEFILE $PROJ_DIR/$PROJ_NAME/Makefile
-    cp $SCRIPT_PATH/$MAIN_CPP $PROJ_DIR/$PROJ_NAME/src/
-    sed -i -e "s/PROJECT_NAME/${PROJ_NAME}/g" $PROJ_DIR/$PROJ_NAME/Makefile
-else
+# Create Makefile and main hello world program file
+if [ "$C_PROJ" == yes ]; then
     cp $SCRIPT_PATH/$C_MAKEFILE $PROJ_DIR/$PROJ_NAME/Makefile
     cp $SCRIPT_PATH/$MAIN_C $PROJ_DIR/$PROJ_NAME/src/
     sed -i -e "s/PROJECT_NAME/${PROJ_NAME}/g" $PROJ_DIR/$PROJ_NAME/Makefile
+elif [ "$CPP_PROJ" == yes ]; then
+    cp $SCRIPT_PATH/$CPP_MAKEFILE $PROJ_DIR/$PROJ_NAME/Makefile
+    cp $SCRIPT_PATH/$MAIN_CPP $PROJ_DIR/$PROJ_NAME/src/
+    sed -i -e "s/PROJECT_NAME/${PROJ_NAME}/g" $PROJ_DIR/$PROJ_NAME/Makefile
+    echo "here"
+elif [ "$JAVA_PROJ" == yes ]; then
+    cp $SCRIPT_PATH/$JAVA_MAKEFILE $PROJ_DIR/$PROJ_NAME/Makefile
+    cp $SCRIPT_PATH/$MAIN_JAVA $PROJ_DIR/$PROJ_NAME/src/$PROJ_NAME.java
+    sed -i -e "s/PROJECT_NAME/${PROJ_NAME}/g" $PROJ_DIR/$PROJ_NAME/Makefile
+    sed -i -e "s/PROJECT_NAME/${PROJ_NAME}/g" $PROJ_DIR/$PROJ_NAME/src/$PROJ_NAME.java
 fi 
