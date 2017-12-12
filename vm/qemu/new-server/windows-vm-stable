@@ -69,7 +69,7 @@ threads=2
     # Disable HPET timing mechanicsm
     -no-hpet
     # TODO: what does this do?
-    -boot order=dc,menu=on
+    -boot order=dc,menu=on,strict=off
 
     # Set date and time for VM
     -rtc base=localtime,\
@@ -80,25 +80,31 @@ driftfix=slew
 ########## DRIVES SETUP #############################################################################
 
     # Configure root fs drive
-    -drive file=/data/vm-disks/windows-passthrough.img,\
+    -drive file=/data/vm-data/vm-disks/windows.img,\
 format=raw,\
 if=none,\
-id=drive-virtio-disk0,\
+id=drive,\
 cache=none,\
-aio=native
+aio=native,\
+media=disk
+           
 
     # Configure installation media disk
-    -drive file=/data/os-images/windows10-x86_64.iso,\
+    -drive file=/data/vm-data/os-images/windows10-x86_64.iso,\
 format=raw,\
 if=none,\
 id=install-image,\
-readonly=on
+readonly=on,\
+media=cdrom
+           
 
     # Configure disk with VIRTIO drivers on it
-    -drive file=/data/cd-roms/virtio-drivers-win_amd64.vfd,\
+    -drive file=/data/vm-data/cd-roms/virtio-win-stable-amd64.vfd,\
 format=raw,\
 if=none,\
-id=drive-fdc0-0-0
+id=drive-fdc0-0-0,\
+media=cdrom
+           
 
 
 
@@ -109,9 +115,10 @@ id=drive-fdc0-0-0
 scsi=off,\
 bus=pci.0,\
 addr=0x5,\
-drive=drive-virtio-disk0,\
-id=virtio-disk0,\
+drive=drive,\
+id=virtio-drive,\
 
+     # Create install image disk device
      -device ide-cd,\
 bus=ide.0,\
 drive=install-image \
@@ -125,12 +132,9 @@ x-vga=on
      -device vfio-pci,\
 host=01:00.1
 
-     # Intel Integrated GPU PCI device passthrough
-     -device vfio-pci,\
-host=00:02.0
-
      # Keybaord Passthrough
-     -usb -usbdevice host:046d:c52b
+     #-usb -usbdevice host:046d:c52b
+     -usb -device usb-host,hostbus=1,hostaddr=4
 
      # Ethernet Port 4 PCI device passthrough
      -device vfio-pci,\

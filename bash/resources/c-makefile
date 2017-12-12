@@ -68,9 +68,12 @@ clean:
 spotless: clean
 	spotless -r
 
-.PHONY: test
-test: all
+.PHONY: run
+run: all
 	@$(EXEC)
+
+.PHONY: test
+test: run
 
 #TODO: get working for cuda
 .PHONY: gdb
