@@ -7,6 +7,7 @@
 
 # TODO: add support for java packages
 # TODO: check to make sure the project name is valid possible name for specific language
+# TODO: fix java makefile problem where if includes *.java~ tmp files in the build
 
 SCRIPT_PATH=$(dirname "${BASH_SOURCE[0]}")
 

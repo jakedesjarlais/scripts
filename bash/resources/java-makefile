@@ -49,4 +49,4 @@ test: all run
 
 .PHONY: run
 run: all
-	@$(JAVA) -cp $(BIN_DIR) $(MAIN_CLASS)
+	@$(JAVA) -cp $(BIN_DIR) $(MAIN_CLASS) $(args)
