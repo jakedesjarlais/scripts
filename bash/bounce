@@ -1,0 +1,4 @@
+#!/bin/bash
+
+sudo bless --mount "/Volumes/$1" --setboot --nextonly
+sudo reboot
