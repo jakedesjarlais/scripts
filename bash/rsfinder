@@ -1,0 +1,4 @@
+#!/bin/bash
+
+sudo killall Finder
+open /System/Library/CoreServices/Finder.app
